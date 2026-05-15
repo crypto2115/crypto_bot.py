@@ -110,7 +110,7 @@ def handle_messages(message):
         donate_text = (
             "🌟 **ቦቱን ይደግፉ** 🌟\n\n"
             "የቦቱን አገልግሎት ይበልጥ ለማሳደግ በቴሌግራም ስታርስ (Stars) ወይም በቶን (TON) ልገሳ ማድረግ ይችላሉ።\n\n"
-            "💎 **TON Wallet Address:**\n... (UQDJz-8jU5JjyXJZYFj_XrSHuWeZdrQS0tahU2Ie5WWacpYp)`\n\n"
+            "💎 **TON Wallet Address:**\n...(UQDJz-8jU5JjyXJZYFj_XrSHuWeZdrQS0tahU2Ie5WWacpYp)`\n\n"
             "⭐ **Telegram Stars:**\nበቀጥታ አድሚኑን @Crypto2115 በማነጋገር በስጦታ መልክ መላክ ይችላሉ።\n\n"
             "ለሚያደርጉት ድጋፍ ከልብ እናመሰግናለን! 🙏"
         )
