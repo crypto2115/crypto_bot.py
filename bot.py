@@ -9,8 +9,9 @@ CHANNEL_USERNAME = os.getenv('CHANNEL_USERNAME')
 
 bot = telebot.TeleBot(TOKEN)
 
-# በጊዜያዊነት የዶላር ዋጋ እዚህ ይቀመጣል 
-CURRENT_DOLLAR_RATE = 120.0 
+# የመግዣ እና የመሸጫ ዋጋዎች ለየብቻ (በመጀመሪያ መነሻ እዚህ ይቀመጣሉ)
+BUY_RATE = 122.0   # ደንበኛ ከአንተ የሚገዛበት ዋጋ
+SELL_RATE = 120.0  # ደንበኛ ለአንተ የሚሸጥበት ዋጋ
 
 # የተጠቃሚዎችን የግብይት ሂደት ለመያዝ
 user_sessions = {}
@@ -35,17 +36,31 @@ def start(message):
     
     send_main_menu(message.chat.id)
 
-# ለአድሚን ብቻ የዶላር ዋጋ መለወጫ (/setrate 125.5)
-@bot.message_handler(commands=['setrate'])
-def set_rate(message):
-    global CURRENT_DOLLAR_RATE
+# ለአድሚን ብቻ የመግዣ ዋጋ መለወጫ (/setbuy 122.5)
+@bot.message_handler(commands=['setbuy'])
+def set_buy_rate(message):
+    global BUY_RATE
     if str(message.from_user.id) == str(ADMIN_ID):
         try:
             new_rate = float(message.text.split()[1])
-            CURRENT_DOLLAR_RATE = new_rate
-            bot.reply_to(message, f"✅ የዶላር ዋጋ በተሳካ ሁኔታ ተቀይሯል!\n💵 የአሁኑ ዋጋ፦ `{CURRENT_DOLLAR_RATE} ETB`", parse_mode="Markdown")
+            BUY_RATE = new_rate
+            bot.reply_to(message, f"✅ የUSDT መግዣ ዋጋ ተቀይሯል!\n🟢 የአሁኑ መግዣ ዋጋ፦ `{BUY_RATE} ETB`", parse_mode="Markdown")
         except:
-            bot.reply_to(message, "❌ እባክዎ በትክክል ያስገቡ። ምሳሌ፦ `/setrate 120.5`", parse_mode="Markdown")
+            bot.reply_to(message, "❌ እባክዎ በትክክል ያስገቡ። ምሳሌ፦ `/setbuy 122.5`", parse_mode="Markdown")
+    else:
+        bot.reply_to(message, "❌ ይህንን ለማድረግ ፈቃድ የለዎትም።")
+
+# ለአድሚን ብቻ የመሸጫ ዋጋ መለወጫ (/setsell 120.0)
+@bot.message_handler(commands=['setsell'])
+def set_sell_rate(message):
+    global SELL_RATE
+    if str(message.from_user.id) == str(ADMIN_ID):
+        try:
+            new_rate = float(message.text.split()[1])
+            SELL_RATE = new_rate
+            bot.reply_to(message, f"✅ የUSDT መሸጫ ዋጋ ተቀይሯል!\n🔴 የአሁኑ መሸጫ ዋጋ፦ `{SELL_RATE} ETB`", parse_mode="Markdown")
+        except:
+            bot.reply_to(message, "❌ እባክዎ በትክክል ያስገቡ። ምሳሌ፦ `/setsell 120.0`", parse_mode="Markdown")
     else:
         bot.reply_to(message, "❌ ይህንን ለማድረግ ፈቃድ የለዎትም።")
 
@@ -79,7 +94,14 @@ def handle_messages(message):
         btn_back = types.KeyboardButton("🔙 ወደ ዋናው ማውጫ")
         markup.add(btn_buy, btn_sell)
         markup.add(btn_back)
-        bot.send_message(chat_id, f"💰 **የአሁኑ የUSDT ዋጋ፦** `{CURRENT_DOLLAR_RATE} ETB`\n\nምን ማድረግ ይፈልጋሉ?", reply_markup=markup, parse_mode="Markdown")
+        
+        rate_text = (
+            f"📊 **የአሁኑ የUSDT የገበያ ዋጋ፦**\n\n"
+            f"🟢 **እኛ የምንሸጥበት (መግዛት ሲፈልጉ)፦** `{BUY_RATE} ETB`\n"
+            f"🔴 **እኛ የምንገዛበት (መሸጥ ሲፈልጉ)፦** `{SELL_RATE} ETB`\n\n"
+            f"ምን ማድረግ ይፈልጋሉ?"
+        )
+        bot.send_message(chat_id, rate_text, reply_markup=markup, parse_mode="Markdown")
 
     elif "መግዛት እፈልጋለሁ" in text or "መሸጥ እፈልጋለሁ" in text:
         action = "BUY" if "መግዛት" in text else "SELL"
@@ -87,13 +109,13 @@ def handle_messages(message):
         msg = bot.send_message(chat_id, "🔢 እባክዎ የሚፈልጉትን የUSDT መጠን በቁጥር ብቻ ያስገቡ፦\n*(ለምሳሌ፦ 50)*")
         bot.register_next_step_handler(msg, calculate_p2p)
 
-    # 2. የ ታይቶሪያል በተን (አሁን ፅሁፉን ፈልጎ በትክክል ይሰራል)
+    # 2. የ ታይቶሪያል በተን
     elif "Tutorial" in text or "Info" in text or "🔱" in text:
         tutorial_text = (
             "🔱 **ስለ Ethio Free Server ቦት** 🔱\n\n"
             "ይህ ቦት የተመሰረተው የክሪፕቶ ግብይትን (P2P) ለኢትዮጵያውያን ለማቅለል እና ለማገዝ ነው።\n\n"
             "📖 **መመሪያዎች፦**\n"
-            "1️⃣ **P2P ግብይት:** እዚህ ጋር USDT መግዛትና መሸጥ ይችላሉ። ቦቱ አሁን ያለውን የገበያ ዋጋ ተጠቅሞ በብር ስንት እንደሚመጣ ያሰላልዎታል።\n"
+            "1️⃣ **P2P ግብይት:** እዚህ ጋር USDT መግዛትና መሸጥ ይችላሉ። ቦቱ መግዛት ወይስ መሸጥ እንደፈለጉ አይቶ በየራሳቸው ዋጋ ያሰላልዎታል።\n"
             "2️⃣ **Ads (ማስታወቂያ):** የእርስዎን ምርት ወይም አገልግሎት በቻናላችን ላይ ማስተዋወቅ ሲፈልጉ የሚጠቀሙበት ነው።\n"
             "3️⃣ **ደህንነት:** ማንኛውም ግብይት በአድሚኑ @Crypto2115 አማካኝነት በታማኝነት የሚፈጸም ይሆናል።\n\n"
             "ቦቱን ስለተጠቀሙ እናመሰግናለን!"
@@ -105,21 +127,21 @@ def handle_messages(message):
         msg = bot.send_message(chat_id, "📣 የማስታወቂያውን ዝርዝር ጽፈው ይላኩ። አድሚን አይቶ ያነጋግርዎታል።")
         bot.register_next_step_handler(msg, process_ads)
 
-    # 4. የዶኔሽን በተን (Stars እና TON አሁን ይሰራሉ)
+    # 4. የዶኔሽን በተን
     elif "Donate" in text or "Stars" in text or "TON" in text or "🌟" in text:
         donate_text = (
             "🌟 **ቦቱን ይደግፉ** 🌟\n\n"
             "የቦቱን አገልግሎት ይበልጥ ለማሳደግ በቴሌግራም ስታርስ (Stars) ወይም በቶን (TON) ልገሳ ማድረግ ይችላሉ።\n\n"
-                        "💎 **TON Wallet Address:**\n`UQDJz-8jU5JjyXJZYFj_XrSHuWeZdrQS0tahU2Ie5WWacpYp`\n\n"
-
+            "💎 **TON Wallet Address:**\n`UQDJz-8jU5JjyXJZYFj_XrSHuWeZdrQS0tahU2Ie5WWacpYp`\n\n"
             "⭐ **Telegram Stars:**\nበቀጥታ አድሚኑን @Crypto2115 በማነጋገር በስጦታ መልክ መላክ ይችላሉ።\n\n"
             "ለሚያደርጉት ድጋፍ ከልብ እናመሰግናለን! 🙏"
         )
         bot.send_message(chat_id, donate_text, parse_mode="Markdown")
 
-    # 5. ጥያቄና ሀሳብ በተን
+    # 5. ጥያቄና ሀሳብ በተን (ተጠቃሚው አስተያየት እንዲጽፍ ያደርጋል)
     elif "ጥያቄ" in text or "ሀሳብ" in text:
-        bot.send_message(chat_id, "ለማንኛውም ጥያቄ አድሚኑን እዚህ ያግኙ፦ @Crypto2115")
+        msg = bot.send_message(chat_id, "🙋‍♂️ እባክዎ የእርስዎን ጥያቄ ወይም አስተያየት ጽፈው ይላኩ። አድሚኑ ጋር በቀጥታ ይደርሳል።")
+        bot.register_next_step_handler(msg, process_feedback)
 
     # 6. ወደ ዋናው ማውጫ መመለሻ
     elif "ዋናው ማውጫ" in text or "🔙" in text:
@@ -136,15 +158,22 @@ def calculate_p2p(message):
 
     try:
         amount = float(message.text)
-        total_etb = amount * CURRENT_DOLLAR_RATE
+        session = user_sessions.get(user_id, {"action": "BUY"})
         
-        session = user_sessions.get(user_id, {"action": "ግብይት"})
-        action_text = "🟢 መግዛት" if session["action"] == "BUY" else "🔴 መሸጥ"
+        # ደንበኛው በመረጠው ምርጫ መሰረት የሚሰላበትን ዋጋ መለየት
+        if session["action"] == "BUY":
+            current_rate = BUY_RATE
+            action_text = "🟢 መግዛት"
+        else:
+            current_rate = SELL_RATE
+            action_text = "🔴 መሸጥ"
+            
+        total_etb = amount * current_rate
         
         response = (
             f"📊 **የስሌት ውጤት ({action_text})**\n\n"
             f"🔹 የUSDT መጠን: `{amount} USDT`\n"
-            f"🔹 የአሁኑ ዋጋ: `{CURRENT_DOLLAR_RATE} ETB`\n"
+            f"🔹 የተሰላበት ዋጋ: `{current_rate} ETB`\n"
             f"👉 **ጠቅላላ ክፍያ: `{total_etb:,.2f} ETB`**\n\n"
             "ለመቀጠልና ግብይቱን ለመጀመር እርግጠኛ ነዎት?"
         )
@@ -169,10 +198,16 @@ def callback_query(call):
     elif call.data.startswith("confirm_"):
         parts = call.data.split("_")
         action = parts[1] 
-        amount = parts[2]
-        total_etb = float(amount) * CURRENT_DOLLAR_RATE
+        amount = float(parts[2])
         
-        action_title = "🟢 መግዛት" if action == "BUY" else "🔴 መሸጥ"
+        if action == "BUY":
+            current_rate = BUY_RATE
+            action_title = "🟢 መግዛት"
+        else:
+            current_rate = SELL_RATE
+            action_title = "🔴 መሸጥ"
+            
+        total_etb = amount * current_rate
         
         admin_msg = (
             f"🔔 **አዲስ የP2P ጥያቄ መጥቷል!**\n\n"
@@ -192,6 +227,21 @@ def process_ads(message):
         
     bot.send_message(ADMIN_ID, f"📣 **የማስታወቂያ ጥያቄ፦**\n\nከ @{message.from_user.username}\nመልእክት፦ {message.text}")
     bot.send_message(message.chat.id, "✅ የማስታወቂያ ጥያቄዎ ደርሷል። አድሚን ያነጋግርዎታል።")
+
+# አስተያየት ወይም ጥያቄ ሲጻፍ በቀጥታ ለአድሚኑ የሚልክ ተግባር
+def process_feedback(message):
+    if "ዋናው ማውጫ" in message.text or "🔙" in message.text:
+        send_main_menu(message.chat.id)
+        return
+        
+    admin_msg = (
+        f"🙋‍♂️ **አዲስ አስተያየት/ጥያቄ ደርሶዎታል!**\n\n"
+        f"👤 ከ፦ @{message.from_user.username if message.from_user.username else 'የለውም'}\n"
+        f"🆔 ID: `{message.from_user.id}`\n"
+        f"📝 መልእክት፦ {message.text}"
+    )
+    bot.send_message(ADMIN_ID, admin_msg, parse_mode="Markdown")
+    bot.send_message(message.chat.id, "✅ አስተያየትዎ ወይም ጥያቄዎ በተሳካ ሁኔታ ለአድሚኑ ደርሷል። እናመሰግናለን!")
 
 if __name__ == "__main__":
     bot.infinity_polling()
