@@ -77,7 +77,7 @@ def send_main_menu(chat_id):
     markup.add(btn2, btn3)
     markup.add(btn4, btn5)
 
-    welcome_text = "እንኳን ወደ **Ethio Free Server** በደህና መጡ! 🚀\n\nእባክዎ ከታች ካሉት አማራጮች የሚፈልጉትን ይምረጡ።"
+    welcome_text = "እንኳን ወደ **Forex p2p squad** በደህና መጡ! 🚀\n\nእባክዎ ከታች ካሉት አማራጮች የሚፈልጉትን ይምረጡ።"
     bot.send_message(chat_id, welcome_text, reply_markup=markup, parse_mode="Markdown")
 
 @bot.message_handler(func=lambda message: True)
