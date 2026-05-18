@@ -1,5 +1,6 @@
 import telebot
 from telebot import types
+from telebot.types import WebAppInfo  # 💡 ዌብአፑን ለመክፈት የተጨመረ
 import os
 
 # 1. መረጃዎችን ከ Railway Variables መሳብ
@@ -8,6 +9,9 @@ ADMIN_ID = os.getenv('ADMIN_ID')  # የአንተ የቴሌግራም ID (በቁ�
 CHANNEL_USERNAME = os.getenv('CHANNEL_USERNAME')
 
 bot = telebot.TeleBot(TOKEN)
+
+# 💡 የቪርሰል ዌብሳይትህ ሊንክ (አዲሱን Mini App የሚከፍት)
+WEBAPP_URL = "https://forex-p2p-squad.vercel.app/"
 
 # የመግዣ እና የመሸጫ ዋጋዎች ለየብቻ (በመጀመሪያ መነሻ እዚህ ይቀመጣሉ)
 BUY_RATE = 185.0   # ደንበኛ ከአንተ የሚገዛበት ዋጋ
@@ -67,7 +71,9 @@ def set_sell_rate(message):
 def send_main_menu(chat_id):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     
-    btn1 = types.KeyboardButton("💸 USDT መግዛት/መሸጥ (P2P)")
+    # 💡 እዚህ ጋር ነው ለውጡ የተደረገው! አዝራሩ ሲነካ ዌብአፑን በቀጥታ ይከፍታል
+    btn1 = types.KeyboardButton("💸 USDT መግዛት/መሸጥ (P2P)", web_app=WebAppInfo(url=WEBAPP_URL))
+    
     btn2 = types.KeyboardButton("📣 ማስታወቂያ ለማሰራት")
     btn3 = types.KeyboardButton("🔱 Tutorial & Info")
     btn4 = types.KeyboardButton("🌟 Donate (Stars/TON)")
@@ -86,11 +92,11 @@ def handle_messages(message):
     user_id = message.from_user.id
     text = message.text
 
-    # 1. የ P2P በተን
+    # 💡 ማሳሰቢያ፦ የ P2P አዝራሩ አሁን በቀጥታ ዌብአፕ ስለሚከፍት፣ ተጠቃሚው ዌብአፕ የማይደግፍ የድሮ ቴሌግራም የሚጠቀም ከሆነ ይህ የጽሑፍ አማራጭ እንደ መለዋወጫ (Backup) ሆኖ ያገለግላል።
     if "USDT" in text and "P2P" in text:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-        btn_buy = types.KeyboardButton("🟢 USDT መግዛት እፈልጋለሁ")
-        btn_sell = types.KeyboardButton("🔴 USDT መሸጥ እፈልጋለሁ")
+        btn_buy = types.KeyboardButton("🟢 USDT መግዛት እፈልጋለሁ", web_app=WebAppInfo(url=WEBAPP_URL))
+        btn_sell = types.KeyboardButton("🔴 USDT መሸጥ እፈልጋለሁ", web_app=WebAppInfo(url=WEBAPP_URL))
         btn_back = types.KeyboardButton("🔙 ወደ ዋናው ማውጫ")
         markup.add(btn_buy, btn_sell)
         markup.add(btn_back)
