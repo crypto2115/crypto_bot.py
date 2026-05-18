@@ -1,4 +1,4 @@
-Import telebot
+import telebot
 from telebot import types
 import os
 
@@ -67,6 +67,7 @@ def set_sell_rate(message):
 def send_main_menu(chat_id):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     
+    # 🔙 ልክ እንደ ድሮው ተራ በተን ሆኗል (ምንም WebApp ኮድ የለበትም)
     btn1 = types.KeyboardButton("💸 USDT መግዛት/መሸጥ (P2P)")
     btn2 = types.KeyboardButton("📣 ማስታወቂያ ለማሰራት")
     btn3 = types.KeyboardButton("🔱 Tutorial & Info")
@@ -77,7 +78,7 @@ def send_main_menu(chat_id):
     markup.add(btn2, btn3)
     markup.add(btn4, btn5)
 
-    welcome_text = "እንኳን ወደ **Forex p2p squad** በደህና መጡ! 🚀\n\nእባክዎ ከታች ካሉት አማራጮች የሚፈልጉትን ይምረጡ።"
+    welcome_text = "እንኳን ወደ **Forex p2p squad** በደህና መጡ! 🚀\n\nእባክዎ ከታች ካሉት አማራጮች የሚፈልጉትን ይምረጡ。"
     bot.send_message(chat_id, welcome_text, reply_markup=markup, parse_mode="Markdown")
 
 @bot.message_handler(func=lambda message: True)
@@ -86,7 +87,7 @@ def handle_messages(message):
     user_id = message.from_user.id
     text = message.text
 
-    # 1. የ P2P በተን
+    # 1. የ P2P በተን (ጽሑፍና ዋጋ ብቻ የሚያሳየው የድሮው አሰራር)
     if "USDT" in text and "P2P" in text:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
         btn_buy = types.KeyboardButton("🟢 USDT መግዛት እፈልጋለሁ")
@@ -138,7 +139,7 @@ def handle_messages(message):
         )
         bot.send_message(chat_id, donate_text, parse_mode="Markdown")
 
-    # 5. ጥያቄና ሀሳብ በተን (ተጠቃሚው አስተያየት እንዲጽፍ ያደርጋል)
+    # 5. ጥያቄና ሀሳብ በተን
     elif "ጥያቄ" in text or "ሀሳብ" in text:
         msg = bot.send_message(chat_id, "🙋‍♂️ እባክዎ የእርስዎን ጥያቄ ወይም አስተያየት ጽፈው ይላኩ። አድሚኑ ጋር በቀጥታ ይደርሳል።")
         bot.register_next_step_handler(msg, process_feedback)
@@ -160,7 +161,6 @@ def calculate_p2p(message):
         amount = float(message.text)
         session = user_sessions.get(user_id, {"action": "BUY"})
         
-        # ደንበኛው በመረጠው ምርጫ መሰረት የሚሰላበትን ዋጋ መለየት
         if session["action"] == "BUY":
             current_rate = BUY_RATE
             action_text = "🟢 መግዛት"
@@ -171,7 +171,7 @@ def calculate_p2p(message):
         total_etb = amount * current_rate
         
         response = (
-            f"📊 **የስሌት ውጤት ({action_text})**\n\n"
+            f"📊 **የ幕ሌት ውጤት ({action_text})**\n\n"
             f"🔹 የUSDT መጠን: `{amount} USDT`\n"
             f"🔹 የተሰላበት ዋጋ: `{current_rate} ETB`\n"
             f"👉 **ጠቅላላ ክፍያ: `{total_etb:,.2f} ETB`**\n\n"
@@ -228,7 +228,6 @@ def process_ads(message):
     bot.send_message(ADMIN_ID, f"📣 **የማስታወቂያ ጥያቄ፦**\n\nከ @{message.from_user.username}\nመልእክት፦ {message.text}")
     bot.send_message(message.chat.id, "✅ የማስታወቂያ ጥያቄዎ ደርሷል። አድሚን ያነጋግርዎታል።")
 
-# አስተያየት ወይም ጥያቄ ሲጻፍ በቀጥታ ለአድሚኑ የሚልክ ተግባር
 def process_feedback(message):
     if "ዋናው ማውጫ" in message.text or "🔙" in message.text:
         send_main_menu(message.chat.id)
