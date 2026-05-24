@@ -10,7 +10,7 @@ CHANNEL_USERNAME = os.getenv('CHANNEL_USERNAME')
 bot = telebot.TeleBot(TOKEN)
 
 # የመግዣ እና የመሸጫ ዋጋዎች ለየብቻ (በመጀመሪያ መነሻ እዚህ ይቀመጣሉ)
-BUY_RATE = 185.0   # ደንበኛ ከአንተ የሚገዛበት ዋጋ
+BUY_RATE = 189.0   # ደንበኛ ከአንተ የሚገዛበት ዋጋ
 SELL_RATE = 175.0  # ደንበኛ ለአንተ የሚሸጥበት ዋጋ
 
 # የተጠቃሚዎችን የግብይት ሂደት ለመያዝ
